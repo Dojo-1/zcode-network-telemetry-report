@@ -1,0 +1,34 @@
+﻿# Resolved 2026-10-28T07:54:28Z via 1.1.1.1
+api.z.ai
+    CNAME: ga-bp19xpcxwu77sm2gcpqo3.aliyunga0017.com
+    A:     47.245.163.4, 47.245.170.100
+zcode.z.ai
+    CNAME: zcode.z.ai.a1.initaa.com
+    A:     155.102.47.7
+cdn-zcode.z.ai
+    CNAME: cdn-zcode.z.ai.w.cdngslb.com
+    A:     155.102.214.179, 155.102.214.184, 155.102.214.183, 155.102.214.186, 155.102.214.185, 155.102.214.181, 155.102.214.182, 155.102.214.180
+z.ai
+    CNAME: alb-20yq6l9a68bmyj3l02.ap-southeast-1.alb.aliyuncsslbintl.com
+    A:     8.216.131.99, 8.216.131.83, 8.216.131.225
+chat.z.ai
+    CNAME: chat.z.ai.a1.initaa.com
+    A:     155.102.47.43
+open.bigmodel.cn
+    CNAME: ga-bp1xx4zeq2vdhs6phnk7v.aliyunga0018.com
+    A:     8.209.116.154, 47.254.134.77
+maas-log-prod.cn-wlcb.ufileos.com
+    CNAME: 
+    A:     117.50.161.43, 117.50.161.41, 117.50.161.42
+proj-xtrace-[redacted]-cn-beijing.cn-beijing.log.aliyuncs.com
+    CNAME: proj-xtrace-[redacted]-cn-beijing.cn-beijing-c.log.aliyuncs.com
+    A:     8.130.222.175, 8.130.222.161, 123.57.116.48, 123.56.37.46, 59.110.96.221, 59.110.96.118, 39.97.141.140, 8.130.222.211
+[vendor-identifier-redacted]-sdk.rum.aliyuncs.com
+    CNAME: all.rum.aliyuncs.com.w.cdngslb.com
+    A:     163.181.49.192, 163.181.49.183, 163.181.49.203, 163.181.49.178, 163.181.49.181, 163.181.49.190, 155.102.46.10, 163.181.49.184
+sdk.rum.aliyuncs.com
+    CNAME: sdk.rum.aliyuncs.com.w.cdngslb.com
+    A:     155.102.214.181, 155.102.214.184, 155.102.214.179, 155.102.214.182, 155.102.214.185, 155.102.214.186, 155.102.214.183, 155.102.214.180
+cn-shanghai.device.saf.aliyuncs.com
+    CNAME: cn-shanghai.device.saf.aliyuncs.com.gds.alibabadns.com -> alb-fcol8n7pge8ftm83zg.cn-shanghai.alb.aliyuncsslb.com
+    A:     47.117.74.94, 8.153.206.141

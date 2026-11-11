@@ -1,0 +1,9 @@
+﻿# RDAP (RIPE redirects to APNIC where applicable) 2026-10-28T07:54:28Z
+8.130.222.161    ALICLOUD   country=CN  8.128.0.0 - 8.159.255.255  Aliyun Computing Co.LTD
+123.57.116.48    ALISOFT    country=CN  123.56.0.0 - 123.57.255.255  Aliyun Computing Co., LTD 5F, Builing D, the West Lake International Plaza of S&T No.391 Wen'er Road
+123.56.37.46     ALISOFT    country=CN  123.56.0.0 - 123.57.255.255  Aliyun Computing Co., LTD 5F, Builing D, the West Lake International Plaza of S&T No.391 Wen'er Road
+59.110.96.221    ALISOFT    country=CN  59.110.0.0 - 59.110.255.255  Aliyun Computing Co., LTD 5F, Builing D, the West Lake International Plaza of S&T No.391 Wen'er Road
+39.97.141.140    ALISOFT    country=CN  39.96.0.0 - 39.108.255.255  Aliyun Computing Co., LTD 5F, Builing D, the West Lake International Plaza of S&T No.391 Wen'er Road
+47.245.163.4     AL-3       country=    47.235.0.0 - 47.246.255.255  
+155.102.47.5     AL-3       country=    155.102.0.0 - 155.102.255.255  
+117.50.161.42    UCLOUD-NET country=CN  117.50.0.0 - 117.50.255.255  Shanghai UCloud Information Technology Company Limited

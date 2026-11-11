@@ -1,0 +1,53 @@
+# Local-collector capture, session 2 - 2026-10-28 12:02-12:20 (follows evidence/08)
+# ZCode 3.16.3 launched with --proxy-server=http://127.0.0.1:8899 (ALL Chromium/Electron sessions incl. main process
+#   through the gate) and NODE_EXTRA_CA_CERTS = gate CA. Collector hostname -> 127.0.0.1 (local receiver).
+# Session run inside the canary workspace; agent read notes.txt (TOOLCANARY present in a model API request,
+#   i.e. inference) and prompts carried PROMPTCANARY / PROMPTCANARY2. ZCode quit from tray (graceful flush).
+
+## Payloads addressed to the Beijing collector, both sessions: 45
+  41 x /rum/web/v2
+  4 x /apm/trace/opentelemetry/v1/metrics
+  No /apm/.../v1/traces payload at any point, including graceful shutdown.
+
+## Raw byte scan of every payload (term, occurrences, channel)
+  45 payload files scanned as raw bytes
+    <canary t001, value withheld - commitments held in restricted evidence storage>       0  
+    <canary t002, value withheld - commitments held in restricted evidence storage>      0  
+    <canary t003, value withheld - commitments held in restricted evidence storage>         0  
+    notes.txt                   0  
+    zcode-canary-test           0  
+    <windows-user>                     10  rum
+    uid_                       41  rum
+    <device_mid prefix>                  439  rum
+    DESKTOP-                   82  rum
+    session_                  134  metrics/rum
+    user                       46  metrics/rum
+  -> canaries, notes.txt and the workspace name: 0 in all payloads.
+  -> Windows username appears only inside RUM page URLs: file:///C:\Users\[redacted]/AppData/Local/Programs/ZCode/resources/app.asar/...
+  -> 'session_' in metrics is the operation name session_title_generation, not an ID.
+
+## Agent OTLP metrics (service zcode-cli-agent): aggregated duration histograms, no user/device/session identifiers
+    service.name
+    service.version
+    zcode.build.commit_id
+    zcode.product.version
+    zcode.runtime.distribution
+    zcode.runtime.surface
+    zcode.telemetry.schema_owner
+    zcode.telemetry.schema_version
+    zcode.agent.turn.duration
+    $zcode.agent.turn.duration in seconds
+    outcome
+    zcode.agent.step.duration
+    $zcode.agent.step.duration in seconds
+    zcode.tool.execution.duration
+    (zcode.tool.execution.duration in seconds
+    tool_name
+
+## Network
+  0 packets to collector ranges on Wi-Fi (Npcap); 24 loopback connections to the local receiver.
+  0 ERR_NETWORK_ACCESS_DENIED with full proxying: no direct-connection channel remained.
+  Gate blocked only zcode.z.ai/api/v1/marketing/touch (6x). The 'Telemetry report failed: network' exceptions (20)
+  coincide with these refusals; no further destination exists.
+  Also observed (allowed, model host): POST api.z.ai/api/paas/<hash>/v2/client {accessToken, nonce, sig, ts} - signed
+  client authentication, no content. Model requests include ~/.agents/skills paths and descriptions (inference side).

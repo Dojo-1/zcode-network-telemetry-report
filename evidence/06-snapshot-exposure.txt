@@ -1,0 +1,43 @@
+﻿# ZCode workspace-snapshot exposure check - 2026-10-28T09:00:41Z
+# Fix cut-off: sessions before 2026-09-20 count as exposed.
+Windows installed: 2026-10-26   ~\.zcode created: 2026-06-19
+Installed ZCode: 3.16.3.8992
+
+## 1. ZCode versions run on this machine
+  3.12.3   first seen 2026-09-17  <-- AFFECTED
+  3.14.0   first seen 2026-09-19
+  3.14.1   first seen 2026-09-21
+  3.14.3   first seen 2026-09-23
+  3.14.4   first seen 2026-09-30
+  3.14.5   first seen 2026-10-09
+  3.15.1   first seen 2026-10-13
+  3.15.3   first seen 2026-10-14
+  3.16.2   first seen 2026-10-21
+  3.16.3   first seen 2026-10-23
+  (versions older than the first folder left no record)
+
+## 2. Local snapshot indicators
+  ~\.zcode\v2\checkpoints absent
+  ~\.zcode\checkpoints absent
+  *.enc archives:    0
+  snapshot state JSON: 0
+  snapshot strings in logs: 0 file(s); logs cover 2026-10-15.log .. zcode-2026-10-28.jsonl
+
+## 3. Upload code in the installed client
+  repo-snapshot upload code: absent
+  feedback-attachment upload (user-initiated, benign): present
+
+## 4. Project folders ZCode sessions ran in before 2026-09-20
+  2321 session files, 2026-06-25 .. 2026-09-19
+    4 refs  folder                           [private workspace path withheld]
+    4 refs  git repo (full history at risk)  [private workspace path withheld]
+    3 refs  git repo (full history at risk)  [private workspace path withheld]
+    3 refs  git repo (full history at risk)  [private workspace path withheld]
+    3 refs  git repo (full history at risk)  [private workspace path withheld]
+    2 refs  git repo (full history at risk)  [private workspace path withheld]
+    2 refs  git repo (full history at risk)  [private workspace path withheld]
+    2 refs  folder                           [private workspace path withheld]
+
+VERDICT: no local trace != no upload. If section 1 shows an affected version and section 4 lists folders,
+treat those folders (including git history) as possibly copied: rotate committed secrets, and consider a
+GDPR Art. 15 access / Art. 17 erasure request to the controller named in the Z.ai privacy policy.

@@ -1,0 +1,57 @@
+﻿# Local-collector capture - 2026-10-28 (TECHNICAL-REPORT section 7.1)
+# NOTE: This file preserves a historical mid-run note for provenance. Its 7-payload count and preliminary identity statement were superseded by the verified final session-1 count of 16 RUM payloads and the finding of username-in-URL metadata. See addendum and evidence/09.
+# ZCode 3.16.3, -Gate firewall mode, collector hostname -> 127.0.0.1 (hosts), receiver = gate addon in reverse TLS mode.
+# ZCode launched with NODE_EXTRA_CA_CERTS = gate CA (needed: the exporting process does not receive
+#   httpProxyCaCertPath; before this, 15 handshakes to the local receiver were aborted by the client).
+# Session: synthetic prompt containing PROMPTCANARY-xxxx asking the agent to read notes.txt containing TOOLCANARY-xxxx.
+
+## Containment (Npcap: Wi-Fi + loopback)
+  packets to collector ranges on the network: 0  (expect 0)
+  loopback connections to the local receiver (:443 SYN): 21
+  SNI presented on loopback: proj-xtrace-[redacted]-cn-beijing.cn-beijing.log.aliyuncs.com
+
+## Payloads received: 7, all POST /rum/web/v2 (Alibaba ARMS RUM). No /apm/trace (agent OTLP) payloads in this session.
+## Canaries: PROMPTCANARY 0/7, TOOLCANARY 0/7. Initial mid-run assessment (superseded below): no detected username, file path, or project name in the first sample.
+
+## Field values observed (identifiers masked)
+  app.env                      prod
+  app.framework                react
+  app.name                     ZCode
+  app.type                     electron
+  app.version                  3.16.3
+  device.brand                 Intel
+  device.model                 DESKTOP-<redacted>
+  device.name                  DESKTOP-<redacted>
+  net.model                    wifi
+  os.container                 Electron
+  os.container_version         41.0.3
+  os.type                      Windows
+  os.version                   10.0.26300
+  properties.app_version       3.16.3
+  properties.arms_env          prod
+  properties.device_mid       [redacted]
+  properties.platform          windows
+  session.id                   [redacted]
+  user.id                      uid_<redacted>
+  user.name                    [redacted]
+  view.id                      [redacted]
+  view.name                    __default__, index
+  workspace                    default-cms-[redacted]-cn-beijing
+  event types: {'application': 1, 'exception': 6, 'resource': 1, 'view': 4, 'longTask': 3, 'custom': 53, 'action': 1}
+  scenes: {'None': 68, 'app_ready': 1}
+
+## Per-interaction events (custom, group: name)
+  send_funnel: send_click     - on each message sent: model, provider, ask_mode, device_mid
+  plan_usage:  plan_request   - per model call: plan account id, model, request_id, status, latency ms
+  ui_perf:     perf_ui_tool_call_detail - per tool call: tool_name (e.g. Bash), status, duration, session/message/tool_call ids
+  plus startup/performance events (database_startup_*, perf_ui_launch_*, perf_agent_*) and exceptions
+
+## Open
+  6 exception events report 'Telemetry report failed: network' - another channel attempted a direct connection and
+  was blocked by the firewall; its destination and content were not identified.
+
+## Addendum (re-check from raw captures, 2026-10-28)
+  This file was written mid-run. Final session-1 count: 16 RUM payloads (11:51:42-12:02); canaries 0/16.
+  The statement 'No username' is superseded: the Windows username occurs inside RUM page URLs
+  (file:///C:/Users/<user>/.../app.asar/...); see evidence/09 and TECHNICAL-REPORT section 7.1.
+  The 'Telemetry report failed' channel is resolved in evidence/09 (no direct-connection channel under full proxying).

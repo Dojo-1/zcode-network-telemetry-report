@@ -1,0 +1,4 @@
+﻿# Captured 2026-10-28T07:54:28Z (Get-NetTCPConnection). pid=0 => TIME_WAIT, owner already released.
+0.0.0.0:0              Bound        pid=13844  ZCode|C:\Users\[redacted]\AppData\Local\Programs\ZCode\ZCode.exe
+59.110.96.221:443      TimeWait     pid=0      Idle|
+0.0.0.0:0              Listen       pid=16216  ZCode|C:\Users\[redacted]\AppData\Local\Programs\ZCode\ZCode.exe

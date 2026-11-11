@@ -1,0 +1,36 @@
+﻿# app.asar static analysis 2026-10-28T07:54:28Z
+# ZCode version: 3.16.3.8992
+# app.asar SHA256: 21183DBF3BEE0A786D6CC3B648DDA96F7D443C9674092538B2A6FFB72002822E
+
+## Hostnames hardcoded in bundle (count  host)
+     36 zcode.z.ai
+     11 dev.bigmodel.cn
+      9 api.z.ai
+      6 .rum.aliyuncs.com
+      6 -sdk.rum.aliyuncs.com
+      4 chat.z.ai
+      3 open.bigmodel.cn
+      3 docs.z.ai
+      3 cdn-zcode.z.ai
+      2 sdk.rum.aliyuncs.com
+      2 proj-xtrace-[redacted]-cn-beijing.cn-beijing.log.aliyuncs.com
+      2 o.alicdn.com
+      2 g.alicdn.com
+      1 x.alicdn.com
+      1 pre-cn-shanghai.device.saf.aliyuncs.com
+      1 pre-ap-southeast-1.device.saf.aliyuncs.com
+      1 dashscope.aliyuncs.com
+      1 dashscope-intl.aliyuncs.com
+      1 cn-shanghai.device.saf.aliyuncs.com
+      1 cloudauth-device-pre.ap-southeast-1.aliyuncs.com
+      1 cloudauth-device-pre.aliyuncs.com
+      1 cloudauth-device-dualstack.cn-shanghai.aliyuncs.com
+      1 cloudauth-device-dualstack.ap-southeast-1.aliyuncs.com
+      1 ap-southeast-1.device.saf.aliyuncs.com
+      1 ap-southeast-1-ga.device.saf.aliyuncs.com
+
+## Production OpenTelemetry exporter config (license key redacted)
+OTEL_EXPORTER_OTLP_ENDPOINT:"https://proj-xtrace-[redacted]-cn-beijing.cn-beijing.log.aliyuncs.com/apm/trace/opentelemetry",OTEL_EXPORTER_OTLP_HEADERS:"x-arms-license-key=REDACTED,x-arms-project=proj-xtrace-[redacted]-cn-beijing,x-cms-workspace=default-cms-[redacted]-cn-beijing",OTEL_SERVICE_NAME:"zcode-cli-agent"
+
+## Alibaba ARMS RUM endpoint (license key redacted)
+https://proj-xtrace-[redacted]-cn-beijing.cn-beijing.log.aliyuncs.com/rum/web/v2?workspace=default-cms-[redacted]-cn-beijing&service_id=REDACTED

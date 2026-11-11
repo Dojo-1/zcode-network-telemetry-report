@@ -1,0 +1,81 @@
+# ZCode on macOS - host observations - 2026-10-28
+# Method: read-only inspection (codesign, spctl, lsof, sfltool, dig, strings over app.asar, local config/log files).
+# Redacted: user name, home path (shown as ~), host name, LAN address, device ID, account data,
+#           workspace key, manifest hash, project names and file contents.
+# Raw evidence (with SHA-256 manifest) is held privately and is not part of this repository.
+
+## 1. Installed client
+  Path:        /Applications/ZCode.app
+  Version:     3.15.1 (dev.zcode.app)
+  Signature:   Developer ID Application: Beijing Knowledge Atlas Technology Joint Stock Company Limited (8A5X4JJ39T)
+               notarized, spctl "accepted", signing timestamp 2026-10-10
+  Staged:      3.16.3 downloaded by Squirrel/ShipIt, pending install on quit
+  Uptime:      main process running continuously since 2026-10-17
+  Login items: app entry disabled; "ZCode - background tasks" enabled (sfltool dumpbtm)
+  Helper:      ~/.zcode/computer-use/ZCode Computer Use.app (dev.zcode.cua-helper, same team ID),
+               metadata: "version": "3.11.2", installed 2026-09-16
+  TCC grants for the helper: NOT inspected (requires Full Disk Access)
+
+## 2. Telemetry endpoints in app.asar (3.15.1) - same as Windows 3.16.3 (evidence/04)
+  https://proj-xtrace-[redacted]-cn-beijing.cn-beijing.log.aliyuncs.com/apm/trace/opentelemetry
+  https://proj-xtrace-[redacted]-cn-beijing.cn-beijing.log.aliyuncs.com/rum/web/v2?workspace=default-cms-[redacted]-cn-beijing&service_id=[vendor-identifier-redacted]
+  https://zcode.z.ai/api/v1/event/report
+  https://sdk.rum.aliyuncs.com/module/pako.min.js
+  https://dashscope.aliyuncs.com/compatible-mode/v1, https://open.bigmodel.cn/api/paas/v4
+
+## 3. Live socket, 2026-10-28 ~21:4x local (lsof -nP -i, before shutdown)
+  ZCode         (main, /Applications/ZCode.app 3.15.1)  TCP <lan>:54884 -> 8.130.222.161:443  (CLOSED)
+  ZCode Helper  (NetworkService utility)                TCP <lan>:53242 -> 155.102.47.2:443   (CLOSED)
+  ZCode Helper  (NetworkService utility)                TCP <lan>:54846 -> 155.102.47.5:443   (CLOSE_WAIT)
+
+  dig +short proj-xtrace-7e235817...-cn-beijing.cn-beijing.log.aliyuncs.com (same evening):
+    8.130.222.175  8.130.222.161  123.57.116.48  123.56.37.46
+    59.110.96.221  59.110.96.118  39.97.141.140  8.130.222.211
+  => 8.130.222.161 is an A-record of the Beijing ARMS collector.
+  Not captured: SNI or payload of that socket (state was CLOSED when observed).
+
+  Note: 8.130.222.161 is NOT in APNIC's CN delegation list (8.128.0.0/10 is ARIN-registered to
+  Alibaba). A CN geo-block alone does not cover it; firewall/block-china.sh blocks the collector
+  A-records explicitly.
+
+## 4. Persistent device identifier
+  ~/.zcode/v2/telemetry-state.json holds "deviceMid" (UUID, redacted). The same UUID is passed
+  to the Electron renderer as --device-id=<redacted> on its command line. evidence/08 shows
+  device_mid in RUM payloads on Windows.
+
+## 5. Workspace-snapshot state record (historical)
+  ~/.zcode/v2/checkpoints/<workspace-key>/state.json   mtime 2026-06-24 19:08 local
+    workspacePath:            <user project folder>
+    lastAcceptedManifestHash: <redacted 64-hex>
+    lastAcceptedManifestPath: ~/.zcode/v2/repo-snapshots/<workspace-key>/manifests/<hash>.json
+  Subfolders manifests/ (emptied 2026-07-05), pending/, tmp/ - all empty. No *.enc archives.
+  ~/.zcode/v2/repo-snapshots/ no longer exists.
+
+  Corroboration of date: the ZCode CLI database (~/.zcode/cli/db/db.sqlite) stores an agent tool
+  call at 2026-06-25T14:23:26Z whose output is `ls -la ~/.zcode/v2`. It lists
+  `repo-snapshots/` created Jun 24 17:44 and no `checkpoints/` folder. The current checkpoints/<key>
+  therefore appears to be the June repo-snapshots/<key> folder, moved later with timestamps kept.
+
+  Implementation: absent. Strings lastAcceptedManifest, captureBeforePrompt, repo-wiki-update and
+  snapshot/upload-credential do not occur in installed 3.15.1 or staged 3.16.3. In 3.15.1
+  "repo-snapshots" occurs once, in an exclusion list beside "checkpoints" and "credentials.json"
+  next to a secret-redaction regex. No older ZCode binary or installer remains on the host.
+
+  App version that wrote the record: NOT determinable from the host.
+
+  Interpretation (pre-registered test: positive / negative / inconclusive) -> INCONCLUSIVE.
+    Established: a snapshot/manifest state record for a user workspace was written locally on 2026-06-24.
+    Not established: that any remote service received or acknowledged the manifest or any file
+    contents. "lastAccepted" may denote local acceptance, remote acknowledgement or pre-transmission
+    sync state. This record does NOT show an upload earlier than the publicly reported 3.12.3 window.
+
+## 6. Not observed
+  - ufileos.com (image upload) references in retained logs (2026-10-04 .. 2026-10-28)
+  - ZCode LaunchAgents / LaunchDaemons; /etc/hosts modifications
+  - Logs older than 2026-10-04 (rotated)
+
+## 7. Response actions taken
+  - Evidence preserved (43 files + SHA-256 manifest; credentials.json deliberately excluded)
+  - ShipIt launchd job removed before quit so the staged 3.16.3 did not overwrite the 3.15.1 bundle
+  - ZCode did not respond to an AppleEvent quit or SIGTERM; terminated with SIGKILL
+  - Post-checks: no ZCode processes or launchd jobs, no connections to collector or 155.102.47.x

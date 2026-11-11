@@ -1,0 +1,8 @@
+﻿# tshark -i Wi-Fi, reported 180 s acquisition beginning 2026-10-28 07:51:30Z; recorded entries continue through 07:55:15Z (original end label 07:54:30Z is inconsistent; raw capture not independently checked). TLS ClientHello only (SNI = host the client actually connected to).
+# DNS lines omitted: the analyst's own Resolve-DnsName calls ran in the same window and would contaminate them.
+# fields: utc_time | dst_ip | sni | dst_port
+2026-10-28T07:52:24.367168900Z | 59.110.96.221 | proj-xtrace-[redacted]-cn-beijing.cn-beijing.log.aliyuncs.com | 443
+2026-10-28T07:52:28.486698500Z | 76.76.21.61 | docs.z.ai | 443
+2026-10-28T07:54:41.022159800Z | 155.102.47.8 | zcode.z.ai | 443
+2026-10-28T07:55:12.386832800Z | 123.57.116.48 | proj-xtrace-[redacted]-cn-beijing.cn-beijing.log.aliyuncs.com | 443
+2026-10-28T07:55:15.329424200Z | 123.57.116.48 | proj-xtrace-[redacted]-cn-beijing.cn-beijing.log.aliyuncs.com | 443

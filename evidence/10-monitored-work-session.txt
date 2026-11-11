@@ -1,0 +1,19 @@
+﻿# Monitored real-work session (session 3) - 2026-10-28 12:40-12:56
+# ZCode 3.16.3, goal mode, user's own research conversation. Fully proxied (--proxy-server), NODE_EXTRA_CA_CERTS,
+#   Beijing collector answered locally; Npcap on Wi-Fi + loopback. No canaries: content detection by
+#   cross-correlation (gate/content-monitor.py): 40-char fingerprints of every model-API request body
+#   (messages, tool results, system prompt) searched in every non-inference payload.
+# Monitor validated before use: replay of session 2 (0 false positives over 29 payloads) and a planted
+#   synthetic leak through the gate (flagged CONTENT-LEAK + PII).
+
+Model-API message requests:          17 (27.2 MB) -> 26,869 fingerprints
+Non-inference payloads scanned:      76 (Beijing collector 51: 48 RUM + 3 OTLP metrics; other gate payloads 25)
+Content fingerprint hits:            0
+PII beyond documented identifiers:   0 (documented: account uid, device_mid, computer name, username in asar URL)
+Topic keyword outside inference:     0 (positive control: present in 16 of 17 model requests)
+OTLP trace export:                   none
+Destinations via gate:               api.z.ai, zcode.z.ai, cdn-zcode.z.ai; blocked: marketing/touch x5
+Direct-connection attempts:          0 (ZCode log)
+Wire:                                0 packets to collector ranges; 43 loopback connections to local receiver
+
+Result: across the inspected routes and monitored 16-minute session, no exact selected content fingerprints were found in non-inference payloads. Unobserved or transformed transfers are not ruled out.

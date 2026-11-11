@@ -1,0 +1,21 @@
+﻿# OpenCode v1.19.4 network audit - 2026-10-28
+# Binary: anomalyco/opencode release v1.19.4, opencode-windows-x64.zip
+#   SHA-256 93b899277bd6f68803009e32bf71772ce43c34b18adf1e93b9b4d8780fdf62e5 (matches GitHub digest)
+#   Authenticode: Valid, Anomaly Innovations, Inc
+# Method: 3 'opencode run' invocations through zcode_gate.py in observe mode (log all, block nothing),
+#   HTTPS_PROXY + NODE_EXTRA_CA_CERTS; dummy API key; config: autoupdate=false, share=disabled,
+#   OPENCODE_DISABLE_AUTOUPDATE=1, OPENCODE_DISABLE_MODELS_FETCH=1.
+
+## Every request OpenCode made (all runs)
+   19 x POST api.z.ai/api/coding/paas/v4/chat/completions
+=> Only the configured model endpoint. No telemetry, no opencode.ai, no models.dev, no update check.
+
+## Static analysis of the binary
+  OpenTelemetry exporter: present but OPT-IN (only if OTEL_EXPORTER_OTLP_ENDPOINT is set; no hardcoded collector).
+  'amplitude' strings: SVG attribute names, not the Amplitude SDK.
+  opencode.ai URLs: paid inference gateways (Zen/Go, only if selected), theme/config schemas, installer.
+
+## Prompt contents finding
+  By default OpenCode loads Claude Code / external skills (~\.claude\skills, ~\.agents\skills) into the system prompt.
+  First request body: 96427 bytes, included personal profile and project skill descriptions.
+  With OPENCODE_DISABLE_EXTERNAL_SKILLS=1 and OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=1: 2471 bytes, none of it.
