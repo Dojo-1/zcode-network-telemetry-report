@@ -28,7 +28,7 @@
   ZCode Helper  (NetworkService utility)                TCP <lan>:53242 -> 155.102.47.2:443   (CLOSED)
   ZCode Helper  (NetworkService utility)                TCP <lan>:54846 -> 155.102.47.5:443   (CLOSE_WAIT)
 
-  dig +short proj-xtrace-7e235817...-cn-beijing.cn-beijing.log.aliyuncs.com (same evening):
+  DNS response for the Beijing ARMS collector (hostname identifier withheld; same evening):
     8.130.222.175  8.130.222.161  123.57.116.48  123.56.37.46
     59.110.96.221  59.110.96.118  39.97.141.140  8.130.222.211
   => 8.130.222.161 is an A-record of the Beijing ARMS collector.
