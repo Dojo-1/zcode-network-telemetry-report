@@ -4,9 +4,11 @@
 
 A coding assistant needs to send prompts to a model. That's expected. The more interesting question is what **else** leaves the client: which endpoints receive telemetry, what fields are present, and what can we actually verify from our side of the connection?
 
-This repository follows that question through application-bundle inspection, DNS and TLS observations, local interception, and bounded content tests. It separates **observed traffic** from **configured behavior**, and both from claims about what happens on someone else's servers.
+This repository follows that question through application-bundle inspection, DNS and TLS observations, local interception, and bounded content tests. It separates **reported observations** from **configured behavior**, and both from claims about what happens on someone else's servers.
 
-**The short answer:** the examined ZCode build configured Alibaba Cloud ARMS telemetry endpoints in the `cn-beijing` region. We observed TLS connections to the collector hostname and captured account/device-linked usage metadata by substituting a local receiver. We did **not** detect the planted prompt/file markers in those telemetry samples, and we did **not** observe transmitted OpenTelemetry *traces*. Neither observation proves that content can never leave through another route or configuration.
+**Evidence provenance.** The network observations and payload counts are reported from the original investigator's records dated 28 October 2026. This public edition contains redacted evidence summaries, not independently inspectable raw packet captures or a separate reproduction of the network experiments. The [synthetic detector checks](evidence/11-synthetic-monitor-audit.md) examine detection logic, not the original network measurements.
+
+**The short answer:** the examined ZCode build configured Alibaba Cloud ARMS telemetry endpoints in the `cn-beijing` region. The investigator recorded TLS connections to the collector hostname and locally captured account/device-linked usage metadata using a substitute receiver. We did **not** detect the planted prompt/file markers in those telemetry samples, and we did **not** observe transmitted OpenTelemetry *traces*. Neither observation proves that content can never leave through another route or configuration.
 
 [Read the technical report](TECHNICAL-REPORT.md) · [Browse the redacted evidence](evidence/)
 
@@ -24,10 +26,10 @@ This repository follows that question through application-bundle inspection, DNS
 
 | Observation window | Sample | Content detection result |
 | --- | --- | --- |
-| Two instrumented local-collector sessions | **45** non-inference collector payloads: **41 RUM JSON** and **4 OTLP metrics** | **0 exact matches** for the planted prompt/file canaries; positive controls appeared in captured model-inference requests |
+| Two instrumented local-collector sessions | **45** non-inference collector payloads: **41 RUM JSON** and **4 OTLP metrics** | **0 exact matches** for the planted prompt/file canaries in the local collector. The file-content canary was exercised **only in session 2**, where it was detected in captured model-inference traffic. |
 | A separately monitored work session | **17** model requests, **76** observed non-inference payloads, **26,869** fixed 40-character fingerprints from selected model-request text | **0 byte-exact fingerprint matches** in the observed non-inference payloads |
 
-The distinction matters: a zero in these tests means **nothing matched these particular probes in these particular captures**. Short quotations, changed encodings, summaries, altered text boundaries, other routes and different client states could escape detection. The local proxy, host redirection, injected certificate authority and firewall also changed the environment being measured.
+The distinction matters: a zero in these tests means **nothing matched these particular probes in these particular captures**; it is not a statistical upper bound on other content exports. Short quotations, changed encodings, summaries, altered text boundaries, other routes and different client states could escape detection. The local proxy, host redirection, injected certificate authority and firewall also changed the environment being measured.
 
 [Session 1](evidence/08-collector-capture.txt) · [Session 2](evidence/09-collector-capture-session2.txt) · [Monitored work session](evidence/10-monitored-work-session.txt) · [Detector sensitivity and limits](evidence/11-synthetic-monitor-audit.md)
 
