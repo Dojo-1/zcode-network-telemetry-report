@@ -1,64 +1,78 @@
-# ZCode network behaviour: forensic observations
+# ZCode network telemetry: what we saw, and what we didn't
 
-*Technical investigation of client-side network activity, 28 October 2026. Findings are limited to the documented client versions, sessions and inspection methods. Redacted methodology and evidence summaries: [TECHNICAL-REPORT.md](TECHNICAL-REPORT.md); original raw captures and implementation tooling are not publicly distributed.*
+**A client-side forensic investigation · 28 October 2026 · ZCode 3.16.3 (Windows), with a separate read-only look at 3.15.1 (macOS)**
 
-## Scope
+A coding assistant needs to send prompts to a model. That's expected. The more interesting question is what **else** leaves the client: which endpoints receive telemetry, what fields are present, and what can we actually verify from our side of the connection?
 
-The investigation examined an installed ZCode desktop client on Windows using application-bundle inspection, DNS and TLS observations, an intercepting proxy, and a local substitute for the configured telemetry collector. It distinguishes **model-inference traffic**, which necessarily carries submitted context, from **additional client-generated traffic**. No server-side records were available.
+This repository follows that question through application-bundle inspection, DNS and TLS observations, local interception, and bounded content tests. It separates **observed traffic** from **configured behavior**, and both from claims about what happens on someone else's servers.
 
-## Findings
+**The short answer:** the examined ZCode build configured Alibaba Cloud ARMS telemetry endpoints in the `cn-beijing` region. We observed TLS connections to the collector hostname and captured account/device-linked usage metadata by substituting a local receiver. We did **not** detect the planted prompt/file markers in those telemetry samples, and we did **not** observe transmitted OpenTelemetry *traces*. Neither observation proves that content can never leave through another route or configuration.
 
-| Channel | Observation | Limitation |
-|---|---|---|
-| Model inference | Requests to `api.z.ai` contained submitted prompts and context, as expected for a hosted coding assistant. Alibaba-hosted infrastructure and a European network edge were observed. | Final processing location, retention and subsequent use were not established. |
-| Telemetry | The packaged client referenced a Beijing-region Alibaba Cloud OpenTelemetry/RUM collector. TLS connections bearing its SNI were recorded, including during idle periods. Redirected sessions yielded 45 locally decoded payloads containing client, account/session and usage metadata. | The original remote server's acceptance, storage and use of these payloads were not observed. |
-| Product events | Requests to a ZCode event/marketing endpoint were observed during proxy tests. | Downstream processing and retention were not observed. |
-| Image-handling path | An agent tool-call record referenced a UCloud object-storage URL associated with the `cn-wlcb` region. | This observation does not establish the location or handling of every image. |
-| Device risk-control | Alibaba risk-control hostnames were present in the inspected application package. | No corresponding request was observed in the fully proxied test session. |
+[Read the technical report](TECHNICAL-REPORT.md) · [Browse the redacted evidence](evidence/)
 
-### Did telemetry include submitted content?
+## At a glance
 
-Two instrumented sessions received **45 payloads** at a local replacement collector (**41 RUM/JSON and 4 OpenTelemetry metrics/protobuf**). Synthetic markers placed in submitted prompts and a file read by the agent were present in captured inference requests but had **zero exact matches in the collector payloads**. See [evidence/08](evidence/08-collector-capture.txt) and [evidence/09](evidence/09-collector-capture-session2.txt).
+| Question | What the investigation found |
+| --- | --- |
+| **Where did the client connect?** | The inspected package configured a Beijing-region ARMS RUM/OpenTelemetry endpoint; TLS SNI observations matched that collector, including during an idle observation window. |
+| **What was in the sampled telemetry?** | The local substitute received RUM events with account, device, session, application and interaction metadata, plus aggregated OpenTelemetry metrics. |
+| **Was prompt or file content found?** | Not by the specified exact-match tests in the monitored non-inference payloads. That is a bounded negative result, not a universal safety claim. |
+| **Did we see exported OTLP traces?** | No. Trace-related schema fields in a bundle are not proof of transmitted trace contents. |
+| **Where was data stored or used?** | Not established. We had no server-side access, retention logs or training records. |
 
-A separate monitored work session produced **17 model requests** and **76 captured non-inference payloads**. The monitor generated **26,869 fixed 40-character fingerprints** from selected model-request text and found **zero byte-exact matches** in those non-inference payloads ([evidence/10](evidence/10-monitored-work-session.txt)). These results are bounded negative observations, **not proof that no content is ever exported**.
+### The numbers, without the leap
 
-The content detector can miss short excerpts, shifted fragments, text transformations, encoded material and traffic outside the monitored routes. A separate [synthetic sensitivity study](evidence/11-synthetic-monitor-audit.md) documents these limitations. The agent's OpenTelemetry *trace* exporter was not observed successfully sending a trace in the instrumented sessions; its potential content-bearing fields therefore remain an **untested path**. A trace-related field name in the package is not evidence that the field was transmitted.
+| Observation window | Sample | Content detection result |
+| --- | --- | --- |
+| Two instrumented local-collector sessions | **45** non-inference collector payloads: **41 RUM JSON** and **4 OTLP metrics** | **0 exact matches** for the planted prompt/file canaries; positive controls appeared in captured model-inference requests |
+| A separately monitored work session | **17** model requests, **76** observed non-inference payloads, **26,869** fixed 40-character fingerprints from selected model-request text | **0 byte-exact fingerprint matches** in the observed non-inference payloads |
 
-## Policy and interpretation
+The distinction matters: a zero in these tests means **nothing matched these particular probes in these particular captures**. Short quotations, changed encodings, summaries, altered text boundaries, other routes and different client states could escape detection. The local proxy, host redirection, injected certificate authority and firewall also changed the environment being measured.
 
-The international ZCode privacy policy dated 15 June 2026 identifies a Singapore controller, describes processing **generally** in Singapore and allows transfers to other jurisdictions. A separate policy addresses the Chinese market. The observed Beijing-region collector raises a question about destination-specific disclosure and applicable safeguards, but the word *generally* does not establish Singapore-only processing.
+[Session 1](evidence/08-collector-capture.txt) · [Session 2](evidence/09-collector-capture-session2.txt) · [Monitored work session](evidence/10-monitored-work-session.txt) · [Detector sensitivity and limits](evidence/11-synthetic-monitor-audit.md)
 
-The observations support the presence of additional telemetry and pseudonymous, potentially identifying metadata. They **do not establish** undisclosed model training, unauthorized access to source repositories, remote retention periods, legal noncompliance or malicious intent. Those issues require independent records or provider disclosure. A regional hostname identifies a service endpoint, not necessarily every subsequent storage or processing location.
+## Two different flows, two different questions
 
-## Separate historical issue: workspace snapshots
+**1. Model inference.** Requests to `api.z.ai` included the prompts and context supplied to the hosted assistant. That is expected for a cloud model. Observing a European network edge does not tell us where the provider ultimately processes or stores the request.
 
-An [independent investigation](https://blog.ferstar.org/en/posts/zcode-silent-workspace-snapshot-upload/) reported a workspace-snapshot upload mechanism in earlier ZCode versions. Reporting indicates removal in version 3.14.0. The client-side records examined here do not establish whether any historical workspace upload completed or whether associated data were retained. This question is separate from the October telemetry measurements; see [the technical report](TECHNICAL-REPORT.md#8-workspace-snapshot-upload-incident-sept-2026-exposure-check). The restricted source repository contains an exposure-check script, omitted from this release candidate.
+**2. Client-generated telemetry.** The investigated build configured a separate ARMS collector, with endpoint names identifying a Beijing region. TLS hostname evidence and a locally redirected collector support the identification of a telemetry channel. The replacement receiver decoded operational metadata such as model choice, call timing/latency, tool-use events, device information and account/session identifiers. **Acceptance or retention by the actual remote collector was not directly observed.**
 
-## macOS host (ZCode 3.15.1)
+Other observed or configured channels included a ZCode product-event endpoint, an image-related UCloud URL, and device risk-control hostnames. Their appearance in a package or single tool record is not proof that every associated feature transmitted data in the monitored sessions. See [the full endpoint discussion](TECHNICAL-REPORT.md) and [sanitized bundle observations](evidence/04-bundle-endpoints.txt).
 
-A second, independently running installation was examined read-only on macOS ([evidence/12](evidence/12-macos-host-observations.txt)). The 3.15.1 bundle contains the same Beijing ARMS trace and RUM endpoints. A socket record associated with the main ZCode process showed `8.130.222.161`, an A-record of that collector; the socket was `CLOSED` when inspected, so it was not an active-payload capture. That address is ARIN-registered and is not covered by APNIC's CN list, so the macOS script blocks collector addresses explicitly. A persistent device identifier is stored locally and passed to the renderer. A local workspace-snapshot state record dated 2026-06-24 was found. Its implementation is absent from the installed versions and its writing version could not be determined, so whether anything was transmitted is **inconclusive**. It does not establish an upload outside the publicly reported window.
+## Why destination and disclosure matter
 
-## Evidence and reproduction boundaries
+The international ZCode privacy policy reviewed for this investigation described processing **generally** in Singapore and allowed transfers to other jurisdictions. A Beijing-region telemetry endpoint therefore raises legitimate questions about destination-specific disclosure, the applicable controller, data categories and cross-border safeguards—but *generally* is not a promise of Singapore-only processing.
 
-This text-only release candidate contains the technical account and **12 redacted evidence summaries**. The historical interception, local firewall and evidence-collection scripts are retained in restricted source material; no executable reproduction tooling, unmodified network captures or synthetic canary commitments are included. Their absence limits independent reproducibility.
+The captured telemetry included pseudonymous but potentially identifying metadata. The record does **not** establish covert source-code exfiltration, undisclosed model training, unlawful processing, malicious intent, server-side storage locations or retention periods. Those stronger conclusions require evidence we did not have.
 
-| Included artifact | Purpose |
-|---|---|
-| [TECHNICAL-REPORT.md](TECHNICAL-REPORT.md) | Methodology, quantitative observations, attribution and explicit limitations |
-| [evidence/](evidence/) | Sanitized network, collector and sensitivity summaries |
+The technical report compares the policies as reviewed on 28 October 2026. Policy text and service configurations can change; consult the provider's current notices for present-day terms.
 
-**Safety limitation:** local interception, hosts-file redirection and firewall rules can change the system being measured; a process-specific restriction may not cover child processes or alternate routes. Experimental proxy captures can contain confidential prompts and credentials and must stay in access-controlled storage. The original investigation reported owner-only capture controls, but those controls were not independently re-exercised as part of this release review.
+## An earlier, separate question: workspace snapshots
 
-### macOS protection: scope and limits
+A [separate investigator's report](https://blog.ferstar.org/en/posts/zcode-silent-workspace-snapshot-upload/) described a historical ZCode workspace-snapshot upload mechanism in earlier releases, reportedly removed in version 3.14.0. The Windows host examined here had run an affected version, but its remaining local records **could not determine whether an upload completed or whether any associated data were retained**. This is **not** evidence that the October telemetry channel uploaded repositories.
 
-The following summarizes the original, non-distributed script design, **not verified protection for arbitrary installations**.
+[Read the bounded historical exposure assessment](evidence/06-snapshot-exposure.txt).
 
-- **Routing, not isolation.** macOS pf filters by destination address, not by process. The gate and launcher route ZCode through the inspection proxy, but a ZCode or child process that ignores proxy settings can still reach z.ai directly. CN-allocated ranges, the Beijing collector addresses and the sinkholed side-channel hosts stay blocked either way. Enforced per-app egress needs an app firewall rule (for example LuLu or Little Snitch) limiting ZCode to `127.0.0.1:8899`.
-- **Fail-safe updates.** At boot the last validated ruleset is loaded before any network access. APNIC refreshes are validated and swapped in atomically, and a failed refresh keeps the previous tables.
-- **Private captures.** The gate writes captures owner-only (`umask 077`, data directory `700`). There is no retention limit yet, so delete `~/ZCodeGate/data` when it is no longer needed.
-- **Reversible settings.** The first `configure` records ZCode's original proxy settings; `unconfigure` / `setup-macos.sh uninstall` restores them exactly.
-- **Not yet tested:** the reboot path on real hardware, and an isolated end-to-end regression suite covering install, boot, firewall failure, bypass attempts and uninstall. `setup-macos.sh` checks are smoke tests, not security acceptance tests.
+## Windows and macOS are not the same experiment
 
-A limited comparison with OpenCode 1.19.4 is documented separately in [evidence/07](evidence/07-opencode-audit.txt); short tests of another client do not establish absence of telemetry under all configurations.
+The detailed interception and content tests concerned **ZCode 3.16.3 on Windows**. A second **3.15.1 macOS** installation was examined read-only: its package contained similar collector endpoints, and a socket record associated with ZCode referenced a collector IP. That socket was **closed** when inspected, so it did not reveal payload contents. The macOS observations do not replicate the Windows content experiment.
 
-**Status:** evidence-supported findings are restricted to the listed observations and versions. No claim is made about provider-side training or storage. Corrections should preserve the original measurements and be recorded alongside new evidence.
+[Read the macOS notes](evidence/12-macos-host-observations.txt).
+
+## Explore the record
+
+- **[TECHNICAL-REPORT.md](TECHNICAL-REPORT.md)** — attribution, methods, observed values, corrections and limitations.
+- **[Network evidence](evidence/)** — sanitized DNS, TLS SNI, host observations, collector summaries and synthetic checks.
+- **[Content-monitor limitations](evidence/11-synthetic-monitor-audit.md)** — what exact matching detects and what it can miss.
+
+This publication deliberately **does not include** unredacted packet captures, raw inference bodies, local machine/account identifiers, canary commitments or the original interception/firewall scripts. That protects sensitive material but limits independent reproduction. A successful Git sanitization check is not an external validation of the measurements or an independent privacy/legal review.
+
+## Questions worth answering next
+
+We would welcome verifiable clarification from the provider on the actual destinations and retention of telemetry, the identity fields transmitted, regional routing and safeguards, and whether OTLP traces can carry user or tool content under configurations not exercised here. Independent replication with a clearly documented version, capture route, positive controls and failure cases would be especially useful.
+
+If you spot an error, [open an issue](https://github.com/Dojo-1/zcode-network-telemetry-report/issues) with the exact passage and supporting evidence. **Please do not post credentials, account IDs, private prompts or raw captures in a public issue.** Corrections should narrow or strengthen individual claims without erasing the original observations.
+
+---
+
+*The packets tell us which connections and fields were visible under a particular test. They do not hand us the server's logbook. This report tries to keep that boundary visible.*
